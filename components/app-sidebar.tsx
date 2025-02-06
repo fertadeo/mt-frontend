@@ -14,6 +14,8 @@ import { NavUser } from "@/components/nav-user";
 import { useSidebar } from "@/components/ui/sidebar";
 // Si usas Next.js 13 (app router)
 import { usePathname } from "next/navigation";
+// Importa un ícono para Dashboard (puedes crearlo o usar uno de una librería de íconos)
+
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
@@ -23,6 +25,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 
   if (!user) return null;
 
+ 
+
+  // Combina Dashboard con los módulos que ya trae el usuario
+  const modules = [ ...user.modules];
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -30,14 +37,14 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <div className="p-4">
-          {/* Solo se muestra el título completo cuando no está colapsado */}
+          {/* Se muestra el título completo cuando el sidebar no está colapsado */}
           {!collapsed && (
             <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
               Módulos
             </h3>
           )}
           <ul className="space-y-2">
-            {user.modules.map((module) => {
+            {modules.map((module) => {
               const isActive = pathname === module.url;
               return (
                 <li key={module.name}>
@@ -49,12 +56,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   >
                     <div
                       // En estado expandido se usa un ancho mínimo para alinear el ícono junto al texto.
-                      // En estado colapsado, basta con centrar el ícono sin forzar su contenedor a ocupar el 100%.
+                      // En estado colapsado, se centra el ícono sin forzar su contenedor a ocupar todo el ancho.
                       className={`flex justify-center ${!collapsed ? "min-w-[1.5rem]" : ""}`}
                     >
                       <module.icon className="h-4 w-4" />
                     </div>
-                    {/* El nombre del módulo solo se muestra cuando el sidebar no está colapsado */}
+                    {/* Se muestra el nombre del módulo solo cuando no está colapsado */}
                     {!collapsed && <span>{module.name}</span>}
                   </a>
                 </li>
