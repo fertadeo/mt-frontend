@@ -28,7 +28,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
  
 
   // Combina Dashboard con los módulos que ya trae el usuario
-  const modules = [ ...user.modules];
+  const modules = user.modules ?? [];
 
   return (
     <Sidebar collapsible="icon" {...props}>

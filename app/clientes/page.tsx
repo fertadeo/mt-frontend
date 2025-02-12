@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 
@@ -25,6 +25,7 @@ import {
 import ClientsList from "@/components/clientes/ClientsList";
 import ClientDetail from "@/components/clientes/ClientDetail";
 import ClientForm from "@/components/clientes/ClientForm";
+import Modal from "@/components/ui/Modal";
 import { Client } from "@/components/clientes/types";
 
 // --------------------------
@@ -248,16 +249,18 @@ const ClientsModule: React.FC = () => {
     setSelectedClient(client);
   };
 
-  const handleCloseDetail = () => {
-    setSelectedClient(null);
+  // Al cerrar el modal se resetea el estado (detalle o creación)
+  const handleCloseModal = () => {
+    // Se cierra el modal sin guardar cambios
+    if (isCreating) {
+      setIsCreating(false);
+    } else {
+      setSelectedClient(null);
+    }
   };
 
   const handleCreateClient = () => {
     setIsCreating(true);
-  };
-
-  const handleCancelForm = () => {
-    setIsCreating(false);
   };
 
   const handleSubmitForm = (client: Client) => {
@@ -281,46 +284,50 @@ const ClientsModule: React.FC = () => {
     setSelectedClient(client);
   };
 
+  // Si está activo el detalle o el formulario, consideramos "modal abierto"
+  const isModalOpen = selectedClient || isCreating;
+
   return (
-    <div className="p-4">
-      {/* Listado de clientes */}
-      {!selectedClient && !isCreating && (
+    <div className="p-4 relative">
+      {/* Fondo: siempre se renderiza la lista. Se le aplica blur cuando hay modal abierto */}
+      <div className={isModalOpen ? "filter blur-sm transition duration-300 ease-in-out" : "filter blur-none transition duration-300 ease-in-out"}>
         <ClientsList
           clients={clients}
           onSelectClient={handleSelectClient}
           onCreateClient={handleCreateClient}
         />
-      )}
+      </div>
 
-      {/* Detalle del cliente seleccionado */}
-      {selectedClient && !isCreating && (
-        <ClientDetail
-          client={selectedClient}
-          onClose={handleCloseDetail}
-          onUpdateClient={handleUpdateClient}
-        />
-      )}
-
-      {/* Formulario para crear/editar clientes */}
-      {isCreating && (
-        <ClientForm
-          onSubmit={handleSubmitForm}
-          onCancel={handleCancelForm}
-          existingEmails={clients.map((c) => c.correo)}
-        />
+      {/* Modal: se renderiza si hay detalle o formulario activo */}
+      {isModalOpen && (
+        <Modal onClose={handleCloseModal}>
+          <div className={isModalOpen ? "transition-all duration-50 opacity-100 scale-100" : "transition-all duration-50 opacity-0 scale-95"}>
+            {selectedClient && !isCreating && (
+              <ClientDetail
+                client={selectedClient}
+                onClose={handleCloseModal}
+                onUpdateClient={handleUpdateClient}
+              />
+            )}
+            {isCreating && (
+              <ClientForm
+                onSubmit={handleSubmitForm}
+                onCancel={handleCloseModal}
+                existingEmails={clients.map((c) => c.correo)}
+              />
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );
 };
 
-// ---------------------------------------------------------
-// Página de Clientes con Layout de Dashboard
-// ---------------------------------------------------------
 export default function Page() {
   const { user } = useUser();
   const router = useRouter();
 
-  // Si no hay usuario autenticado, redirige al login.
+  /* // Si no hay usuario autenticado, redirige al login.
   useEffect(() => {
     if (!user) {
       router.push("/login");
@@ -331,7 +338,7 @@ export default function Page() {
   if (!user) {
     return null;
   }
-
+  */
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -356,7 +363,7 @@ export default function Page() {
             </Breadcrumb>
           </div>
         </header>
-        {/* Contenido principal: aquí se renderiza el módulo de clientes */}
+        {/* Contenido principal: se renderiza el módulo de clientes (con modal si es necesario) */}
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <ClientsModule />
         </div>
