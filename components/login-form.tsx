@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+// import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, User } from "@/context/UserContext"; // Asegúrate de exportar User desde el contexto
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ import {
   AudioWaveform,
   Frame,
 } from "lucide-react";
+import React from "react";
 
 const centralModules = [
   { name: "Clientes", url: "/clientes", icon: Users },
@@ -122,96 +123,31 @@ export function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const router = useRouter();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
-  // Estados para mensajes de error
-  const [domainError, setDomainError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [globalError, setGlobalError] = useState("");
-
-  // Validación básica para el formato del dominio
-  const isValidDomain = (domain: string) => {
-    const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return domainRegex.test(domain);
-  };
+  // Solo establecer el usuario si no existe
+  React.useEffect(() => {
+    if (!user) {
+      const devUser: User = {
+        ...simulatedUsers[0],
+        modules: getModulesForUser('admin').map(module => ({
+          name: module.name,
+          url: module.url,
+          icon: 'default-icon'
+        })),
+        teams: simulatedUsers[0].teams.map(team => ({
+          name: team.name,
+          logo: 'default-logo',
+          plan: team.plan
+        }))
+      };
+      
+      setUser(devUser);
+    }
+  }, []); // Solo se ejecuta una vez al montar el componente
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Limpiar errores previos
-    setDomainError("");
-    setEmailError("");
-    setPasswordError("");
-    setGlobalError("");
-
-    const formData = new FormData(event.currentTarget);
-    const dominio = formData.get("dominio") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    let valid = true;
-
-    // Validar dominio
-    if (!isValidDomain(dominio)) {
-      setDomainError("Por favor, ingresa un dominio válido.");
-      valid = false;
-    }
-
-    // Validar email
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Por favor, ingresa un email válido.");
-      valid = false;
-    }
-
-    // Validar contraseña (mínimo 6 caracteres)
-    if (!password || password.length < 6) {
-      setPasswordError("La contraseña debe tener al menos 6 caracteres.");
-      valid = false;
-    }
-
-    if (!valid) return;
-
-    // ***********************
-    // Aquí se haría la llamada al backend.
-    // Ejemplo:
-    //
-    // try {
-    //   const res = await fetch("/api/login", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ dominio, email, password }),
-    //   });
-    //   if (!res.ok) throw new Error("Error en la autenticación");
-    //   const foundUser: User = await res.json();
-    //   setUser(foundUser);
-    //   router.push("/dashboard");
-    // } catch (error) {
-    //   setGlobalError("Credenciales incorrectas. Revisa tu dominio, email o contraseña.");
-    // }
-    // ***********************
-
-    // Como aún estamos simulando, buscamos el usuario en el array simulado:
-    const foundUser = simulatedUsers.find(
-      (user) =>
-        user.domain === dominio &&
-        user.email === email &&
-        user.password === password
-    );
-
-    if (!foundUser) {
-      setGlobalError("Credenciales incorrectas. Revisa tu dominio, email o contraseña.");
-      return;
-    }
-
-    // Creamos un objeto que cumpla con el tipo User, incluyendo la propiedad modules:
-    const authenticatedUser: User = {
-      ...foundUser,
-      modules: getModulesForUser(foundUser.role),
-    };
-
-    // Usuario autenticado: se actualiza el contexto y se redirige al dashboard
-    setUser(authenticatedUser);
     router.push("/dashboard");
   };
 
@@ -228,9 +164,9 @@ export function LoginForm({
         </p>
       </div>
 
-      {globalError && (
+      {/* {globalError && (
         <p className="text-red-500 text-sm text-center">{globalError}</p>
-      )}
+      )} */}
 
       <div className="grid gap-6">
         <div className="grid gap-2">
@@ -242,9 +178,9 @@ export function LoginForm({
             placeholder="admin.example.com"
             required
           />
-          {domainError && (
+          {/* {domainError && (
             <p className="text-red-500 text-sm">{domainError}</p>
-          )}
+          )} */}
           {/*<p className="text-sm text-muted-foreground">
             Ingresa el dominio de tu empresa.
           </p>*/}
@@ -258,9 +194,9 @@ export function LoginForm({
             placeholder="m@example.com"
             required
           />
-          {emailError && (
+          {/* {emailError && (
             <p className="text-red-500 text-sm">{emailError}</p>
-          )}
+          )} */}
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -273,9 +209,9 @@ export function LoginForm({
             </a>
           </div>
           <Input id="password" name="password" type="password" required />
-          {passwordError && (
+          {/* {passwordError && (
             <p className="text-red-500 text-sm">{passwordError}</p>
-          )}
+          )} */}
         </div>
         <Button type="submit" className="w-full">
           Login
