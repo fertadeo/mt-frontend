@@ -18,10 +18,12 @@ import {
   PieChart,
   AudioWaveform,
   Frame,
+  LayoutDashboard
 } from "lucide-react";
 import React from "react";
 
 const centralModules = [
+  { name: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { name: "Clientes", url: "/clientes", icon: Users },
   { name: "Productos", url: "/productos", icon: ShoppingCart },
   { name: "Proveedores", url: "/proveedores", icon: Truck },

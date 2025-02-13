@@ -23,7 +23,7 @@ export default function Page() {
   const { user } = useUser();
   const router = useRouter();
 
-  // Si no hay usuario autenticado, redirigimos al login
+ /* // Si no hay usuario autenticado, redirigimos al login
   useEffect(() => {
     if (!user) {
       router.push("/login");
@@ -34,7 +34,7 @@ export default function Page() {
   if (!user) {
     return null;
   }
-
+*/
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -47,13 +47,13 @@ export default function Page() {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">
-                    Building Your Application
+                    Home
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
+                <BreadcrumbLink href="/Dashboard">
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                  </BreadcrumbLink>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
